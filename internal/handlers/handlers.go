@@ -9,7 +9,8 @@ import (
 	"path/filepath"
 	//"strings"
 	"time"
-	"github.com/Yandex-Practicum/go1fl-sprint6-final/internal/service"
+	//"github.com/Yandex-Practicum/go1fl-sprint6-final/internal/service"
+	"internal/service"
 )
 
 http.HandleFunc("/", indexHandler)
