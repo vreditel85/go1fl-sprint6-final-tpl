@@ -2,8 +2,10 @@ package service
 
 import (
 	"errors"
-	//"github.com/Yandex-Practicum/go1fl-sprint6-final/pkg/morse"
-	"pkg/morse"
+
+	"github.com/Yandex-Practicum/go1fl-sprint6-final/pkg/morse"
+
+	//"pkg/morse"
 	"strings"
 )
 

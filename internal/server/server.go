@@ -6,9 +6,8 @@ import (
 	"time"
 )
 
-
 type Server struct {
-	Logger *log.Logger
+	Logger     *log.Logger
 	HTTPServer *http.Server
 }
 
@@ -17,10 +16,8 @@ func NewServer(logger *log.Logger) *Server {
 	// http-роутер
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		logger.Println("Запрос на корневой маршрут")
-		w.Write([]byte("запущен"))
-	})
+	mux.HandleFunc("/", handlers.indexHandler)
+	mux.HandleFunc("/upload", handlers.uploadHandler)
 
 	// Настройка http-сервера
 	httpServer := &http.Server{

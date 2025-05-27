@@ -2,82 +2,97 @@ package handlers
 
 import (
 	"fmt"
-	"html/template"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
-	//"strings"
+	"strings"
 	"time"
-	//"github.com/Yandex-Practicum/go1fl-sprint6-final/internal/service"
-	"internal/service"
+
+	"github.com/Yandex-Practicum/go1fl-sprint6-final/internal/service"
 )
 
-http.HandleFunc("/", indexHandler)
-http.HandleFunc("/upload", uploadHandler)
+//http.HandleFunc("/index.html", indexHandler)
+//http.HandleFunc("/upload", uploadHandler)
 
-if err := http.ListenAndServe(":8080", nil); err != nil {
-fmt.Printf("Ошибка при запуске сервера: %s", err.Error())
-}
+// if err := http.ListenAndServe(":8080", nil); err != nil {
+// fmt.Printf("Ошибка при запуске сервера: %s", err.Error())
+// }
 // indexHandler возвращает index.html
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	templ, err := template.ParseFiles("index.html")
-	if err != nil {
-		http.Error(w, "Ошибка загрузки", http.StatusInternalServerError)
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
 		return
 	}
 
-	if err := templ.Execute(w, nil); err != nil {
-		http.Error(w, "Ошибка выполнения", http.StatusInternalServerError)
+	// Чтение файла index.html
+	data, err := os.ReadFile("index.html")
+	if err != nil {
+		log.Printf("Ошибка при чтении index.html: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
+
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
 }
 
-// loadHandler обрабатывает загрузку файла
-func loadHandler(w http.ResponseWriter, r *http.Request) {
-	//if err := r.ParseMultipartForm(10 << 20); err != nil { // 10 MB
-	//	http.Error(w, "Error parsing form", http.StatusInternalServerError)
-	//	return
-	//}
+func uploadHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
+		return
+	}
 
-	file, handler, err := r.FormFile("loadedFile")
+	// Парсим форму
+	err := r.ParseMultipartForm(10 << 20) // 10 MB
 	if err != nil {
-		http.Error(w, "Ошибка получения файла", http.StatusInternalServerError)
+		http.Error(w, "Ошибка при парсинге формы", http.StatusBadRequest)
+		return
+	}
+
+	// Получаем файл
+	file, handler, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, "Ошибка при получении файла", http.StatusBadRequest)
 		return
 	}
 	defer file.Close()
 
 	// Чтение содержимого файла
-	fileData, err := io.ReadAll(file)
+	data, err := io.ReadAll(file)
 	if err != nil {
-		http.Error(w, "Ошибка чтения файла", http.StatusInternalServerError)
+		http.Error(w, "Ошибка при чтении файла", http.StatusInternalServerError)
 		return
 	}
 
-	// Конвертация строки (например, в верхний регистр)
-	converted, err := service.AutoDefinition(string(fileData))
+	// Передача в функцию автоопределения из пакета service
+	converted, err := service.AutoDefinition(string(data))
 	if err != nil {
-		http.Error(w, "Ошибка конвертации", http.StatusInternalServerError)
+		http.Error(w, "Ошибка при создании файла", http.StatusInternalServerError)
 		return
 	}
-
-	// Создание нового файла
+	// Генерация имени файла
+	timestamp := strings.ReplaceAll(time.Now().UTC().String(), ":", "-")
 	ext := filepath.Ext(handler.Filename)
-	newFileName := fmt.Sprintf("converted_%s%s", time.Now().UTC().Format("20060102T150405"), ext)
+	outputFileName := fmt.Sprintf("converted_%s%s", timestamp, ext)
 
-	outFile, err := os.Create(newFileName)
+	// Создание и запись в файл
+	outputFile, err := os.Create(outputFileName)
 	if err != nil {
-		http.Error(w, "Ошибка создания файла", http.StatusInternalServerError)
+		http.Error(w, "Ошибка при создании файла", http.StatusInternalServerError)
 		return
 	}
-	defer outFile.Close()
+	defer outputFile.Close()
 
-	// Запись преобразованных данных
-	if _, err := outFile.WriteString(converted); err != nil {
-		http.Error(w, "Ошибка записи файла", http.StatusInternalServerError)
+	_, err = outputFile.WriteString(converted)
+	if err != nil {
+		http.Error(w, "Ошибка при записи в файл", http.StatusInternalServerError)
 		return
 	}
 
-	// Возврат результата пользователю
-	w.Header().Set("Content-Type", "text/html")
-	w.Write([]byte("Converted result:\n\n" + converted))
+	// Возврат результата клиенту
+	w.Header().Set("Content-Type", "text/plain")
+	w.Write([]byte(converted))
 }
