@@ -77,6 +77,6 @@ func loadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Возврат результата пользователю
-	w.Header().Set("Content-Type", "text/plain")
+	w.Header().Set("Content-Type", "text/html")
 	w.Write([]byte("Converted result:\n\n" + converted))
 }
