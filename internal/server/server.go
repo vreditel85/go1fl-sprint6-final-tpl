@@ -48,7 +48,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Получаем файл
-	file, handler, err := r.FormFile("file")
+	file, handler, err := r.FormFile("myFile")
 	if err != nil {
 		http.Error(w, "Ошибка при получении файла", http.StatusBadRequest)
 		return
