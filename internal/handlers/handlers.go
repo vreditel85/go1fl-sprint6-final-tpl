@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 
+	//"internal/service"
 	"io"
 	"log"
 	"net/http"
@@ -16,7 +17,7 @@ import (
 
 // handlers
 // indexHandler возвращает index.html
-func indexHandler(w http.ResponseWriter, r *http.Request) {
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
@@ -35,7 +36,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-func uploadHandler(w http.ResponseWriter, r *http.Request) {
+func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
 		return

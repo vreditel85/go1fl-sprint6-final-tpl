@@ -1,6 +1,7 @@
 package server
 
 import (
+	"internal/handlers"
 	"log"
 	"net/http"
 	"time"
@@ -16,8 +17,8 @@ func NewServer(logger *log.Logger) *Server {
 	// http-роутер
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", handlers.indexHandler)
-	mux.HandleFunc("/upload", handlers.uploadHandler)
+	mux.HandleFunc("/", handlers.IndexHandler)
+	mux.HandleFunc("/upload", handlers.UploadHandler)
 
 	// Настройка http-сервера
 	httpServer := &http.Server{
