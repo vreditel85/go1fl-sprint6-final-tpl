@@ -1,10 +1,13 @@
 package server
 
 import (
-	"internal/handlers"
+	//_ "internal/handlers"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/Yandex-Practicum/go1fl-sprint6-final/internal/handlers"
+	_ "github.com/Yandex-Practicum/go1fl-sprint6-final/internal/service"
 )
 
 type Server struct {
